@@ -79,7 +79,7 @@ jobs:
         echo "version=${{ env.DOTNET }}.${{ env.BUILD }}" >> "$GITHUB_OUTPUT"
 
     - name: Create Release
-      uses: ncipollo/release-action@v1.14.0
+      uses: ncipollo/release-action@v1.21.0
       with:
         tag: ${{ env.VERSION }}
         name: ${{ env.VERSION }}
