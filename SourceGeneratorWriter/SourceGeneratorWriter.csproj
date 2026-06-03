@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<RootNamespace />
+		<!--
+		These types are consumed inside Roslyn analyzers/source generators, so they must obey the
+		same extended analyzer rules the consuming generators do. Validating here keeps the library
+		from introducing breakage downstream.
+		-->
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>SourceGeneratorWriter</PackageId>
+		<Authors>Dæmogar</Authors>
+		<Description>Reusable IndentedTextWriter "block" helpers for authoring Roslyn source generators. Provides IndentedTextWriterBlock and the IndentedTextWriter.Block(...) extension for emitting indentation-aware, brace-wrapped C# source.</Description>
+		<PackageTags>roslyn source-generator codegen indentedtextwriter codedom analyzer</PackageTags>
+		<PackageProjectUrl>https://github.com/daemogar/SourceGeneratorWriter</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/daemogar/SourceGeneratorWriter</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<Copyright>2026</Copyright>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md" Pack="true" PackagePath="\" />
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+</Project>
