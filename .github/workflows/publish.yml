@@ -1,0 +1,96 @@
+# This workflow builds, packs, releases, and publishes the NuGet package.
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+#
+# Mirrors the SQuiL publish pipeline (the project these helpers were extracted from), minus the
+# VSIX / VS Code extension jobs — this repo ships a single NuGet package, so only the `build` job
+# is needed.
+#
+# Both triggers currently produce a `-beta` PRERELEASE:
+#   - push to master            → publish a beta
+#   - a PR review that APPROVES  → publish a beta of the PR's head commit
+# (`pull_request_review` is used instead of `pull_request` so the beta is gated behind an approval
+#  rather than firing on every PR commit.)
+#
+# TODO: official (stable, non-beta) releases are not wired up yet. The plan is to drive them from a
+# version tag push (e.g. on: push: tags: ['v*']) or a similar explicit process — add that path when
+# ready and flip its version suffix/prerelease accordingly.
+
+name: Publish SourceGeneratorWriter
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request_review:
+    types: [ submitted ]
+
+env:
+  PROJECT: SourceGeneratorWriter
+  DIRECTORY: SourceGeneratorWriter
+
+jobs:
+  build:
+
+    # master pushes always run; PR-review events run only when the review is an approval.
+    if: ${{ github.event_name == 'push' || github.event.review.state == 'approved' }}
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v4.1.1
+      with:
+        # On an approval, build the PR's head commit; on a master push, the pushed commit.
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    - name: Git Fetch
+      run: git fetch --prune --unshallow
+
+    - name: Setup DotNet
+      uses: actions/setup-dotnet@v4.0.0
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore Dependencies
+      working-directory: ./${{ env.DIRECTORY }}
+      run: dotnet restore
+
+    - name: Build ${{ env.PROJECT }}
+      working-directory: ./${{ env.DIRECTORY }}
+      run: dotnet build --no-restore -c Release
+
+    - name: Set DotNet Version
+      run: echo "DOTNET=$(dotnet --version)" >> "$GITHUB_ENV"
+
+    - name: Set Build Number
+      run: echo "BUILD=$(printf '%04d' ${{ github.run_number }})" >> "$GITHUB_ENV"
+
+    - name: Set Release Version
+      id: version
+      run: |
+        echo "VERSION=${{ env.DOTNET }}.${{ env.BUILD }}-beta" >> "$GITHUB_ENV"
+        echo "version=${{ env.DOTNET }}.${{ env.BUILD }}-beta" >> "$GITHUB_OUTPUT"
+
+    - name: Create Release
+      uses: ncipollo/release-action@v1.14.0
+      with:
+        tag: ${{ env.VERSION }}
+        name: ${{ env.VERSION }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        draft: false
+        prerelease: true
+        artifactErrorsFailBuild: true
+
+    - name: Pack ${{ env.PROJECT }}
+      env:
+        RELEASE_NOTE: https://github.com/daemogar/${{ env.PROJECT }}/releases/tag/${{ env.VERSION }}
+      working-directory: ./${{ env.DIRECTORY }}
+      run: dotnet pack -c Release --include-symbols -p:SymbolPackageFormat=snupkg /p:Version=${{ env.VERSION }} /p:PackageReleaseNotes="See ${{ env.RELEASE_NOTE }}"
+
+    - name: Push Nuget
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      working-directory: ./${{ env.DIRECTORY }}
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
