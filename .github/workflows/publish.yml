@@ -5,15 +5,15 @@
 # VSIX / VS Code extension jobs — this repo ships a single NuGet package, so only the `build` job
 # is needed.
 #
-# Both triggers currently produce a `-beta` PRERELEASE:
-#   - push to master            → publish a beta
-#   - a PR review that APPROVES  → publish a beta of the PR's head commit
-# (`pull_request_review` is used instead of `pull_request` so the beta is gated behind an approval
+# Both triggers produce a STABLE (non-prerelease) release:
+#   - push to master            → publish a stable release
+#   - a PR review that APPROVES  → publish a stable release of the PR's head commit
+# (`pull_request_review` is used instead of `pull_request` so publishing is gated behind an approval
 #  rather than firing on every PR commit.)
 #
-# TODO: official (stable, non-beta) releases are not wired up yet. The plan is to drive them from a
-# version tag push (e.g. on: push: tags: ['v*']) or a similar explicit process — add that path when
-# ready and flip its version suffix/prerelease accordingly.
+# Version is `<dotnet --version>.<run_number, padded to 4 digits>` (e.g. 10.0.300.0002). Note NuGet
+# normalizes numeric version segments per SemVer, so the leading zeros survive only in the GitHub
+# tag/release name — on nuget.org the package version shows unpadded (e.g. 10.0.300.2).
 
 name: Publish SourceGeneratorWriter
 
@@ -75,8 +75,8 @@ jobs:
     - name: Set Release Version
       id: version
       run: |
-        echo "VERSION=${{ env.DOTNET }}.${{ env.BUILD }}-beta" >> "$GITHUB_ENV"
-        echo "version=${{ env.DOTNET }}.${{ env.BUILD }}-beta" >> "$GITHUB_OUTPUT"
+        echo "VERSION=${{ env.DOTNET }}.${{ env.BUILD }}" >> "$GITHUB_ENV"
+        echo "version=${{ env.DOTNET }}.${{ env.BUILD }}" >> "$GITHUB_OUTPUT"
 
     - name: Create Release
       uses: ncipollo/release-action@v1.14.0
@@ -85,7 +85,7 @@ jobs:
         name: ${{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: false
-        prerelease: true
+        prerelease: false
         artifactErrorsFailBuild: true
 
     - name: Pack ${{ env.PROJECT }}

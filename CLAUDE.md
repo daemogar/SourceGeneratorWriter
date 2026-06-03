@@ -66,13 +66,13 @@ CI mirrors SQuiL's pipeline (`.github/workflows/`), trimmed to this repo's singl
   **`pull_request_review` that approves** a PR (`if: github.event.review.state == 'approved'`).
   The approval path checks out the PR's head commit (`github.event.pull_request.head.sha`).
 
-Versioning matches SQuiL: `VERSION = <dotnet --version>.<run_number padded to 4>-beta`
-(e.g. `10.0.300.0001-beta`), tagged as a GitHub **prerelease**. **Both** triggers currently produce a
-`-beta` prerelease — push-to-master and approved-PR alike.
+Versioning: `VERSION = <dotnet --version>.<run_number padded to 4>` (e.g. `10.0.300.0002`), tagged as
+a GitHub **stable release** (`prerelease: false`). **Both** triggers produce a stable release —
+push-to-master and approved-PR alike.
 
-**Official (stable) releases are not wired up yet** (intentional). The plan is to drive them from an
-explicit trigger — most likely a version-tag push (`on: push: tags: ['v*']`) — with `-beta` dropped
-and `prerelease: false`. See the TODO comment at the top of `publish.yml` before adding it.
+Note: NuGet normalizes numeric version segments per SemVer (no leading zeros), so the 4-digit padding
+survives only in the GitHub tag/release name — on nuget.org the version shows unpadded (e.g. the tag
+`10.0.300.0002` lists as `10.0.300.2`). This is a hard NuGet rule, not a workflow bug.
 
 Required GitHub secrets (Settings → Secrets and variables → Actions):
 
