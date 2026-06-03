@@ -35,6 +35,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # ncipollo/release-action needs write access to create the release + tag.
+    # Set explicitly so publishing doesn't depend on the repo's default GITHUB_TOKEN permissions.
+    permissions:
+      contents: write
+
     outputs:
       version: ${{ steps.version.outputs.version }}
 
