@@ -11,9 +11,9 @@
 # (`pull_request_review` is used instead of `pull_request` so publishing is gated behind an approval
 #  rather than firing on every PR commit.)
 #
-# Version is `<dotnet --version>.<run_number, padded to 4 digits>` (e.g. 10.0.300.0002). Note NuGet
-# normalizes numeric version segments per SemVer, so the leading zeros survive only in the GitHub
-# tag/release name — on nuget.org the package version shows unpadded (e.g. 10.0.300.2).
+# Version is `<dotnet --version>.<run_number>` (e.g. 10.0.300.3). No zero-padding: NuGet normalizes
+# numeric version segments per SemVer (no leading zeros), so an unpadded run_number keeps the GitHub
+# tag/release name identical to the version shown on nuget.org.
 
 name: Publish SourceGeneratorWriter
 
@@ -70,7 +70,7 @@ jobs:
       run: echo "DOTNET=$(dotnet --version)" >> "$GITHUB_ENV"
 
     - name: Set Build Number
-      run: echo "BUILD=$(printf '%04d' ${{ github.run_number }})" >> "$GITHUB_ENV"
+      run: echo "BUILD=${{ github.run_number }}" >> "$GITHUB_ENV"
 
     - name: Set Release Version
       id: version
