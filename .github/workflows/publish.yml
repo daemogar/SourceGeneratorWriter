@@ -40,7 +40,7 @@ jobs:
 
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v6.0.3
       with:
         # On an approval, build the PR's head commit; on a master push, the pushed commit.
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
