@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/Solution/" />
+  <Folder Name="/Solution/workflows/">
+    <File Path=".github/workflows/build.yml" />
+    <File Path=".github/workflows/publish.yml" />
+  </Folder>
   <Project Path="SourceGeneratorWriter.Tests/SourceGeneratorWriter.Tests.csproj" />
   <Project Path="SourceGeneratorWriter/SourceGeneratorWriter.csproj" />
 </Solution>

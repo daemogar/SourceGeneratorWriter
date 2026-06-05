@@ -1,52 +1,21 @@
 ﻿namespace System.CodeDom.Compiler;
 
-/// <summary>Extension methods on <see cref="IndentedTextWriter"/> for emitting indented code blocks.</summary>
+/// <summary>
+/// Adds a <see cref="SourceGeneratorWriter.Block"/> method to facilitate wrapping and indenting code 
+/// that should be surrounded by <c>{</c> / <c>}</c>. Implments <seealso cref="IDisposable"/> and 
+/// should be used with <c>using</c> or have the <c>Dispose</c> method called. This method does not 
+/// respect the <c>TabString</c> value of <see cref="IndentedTextWriter"/>, so is being replaced with
+/// <seealso cref="SourceGeneratorWriter"/>.
+/// </summary>
+[Obsolete("Use SourceGeneratorWriter instead. This extension does not respect the TabString of IndentedTextWriter.")]
 public static class IndentedTextWriterExtensions
 {
-	/// <summary>
-	/// Writes <paramref name="header"/> line(s) respecting leading-tab indentation, then invokes
-	/// <paramref name="callback"/> (if provided) surrounded by <c>{</c> / <c>}</c>, and repeats
-	/// the same pattern for any additional <paramref name="blocks"/>.
-	/// </summary>
+	/// <inheritdoc cref="SourceGeneratorWriter.Block(IndentedTextWriter, string, string, Action, SourceGeneratorWriterBlock[])"/>
+	[Obsolete("Use SourceGeneratorWriter instead. This method does not respect the TabString of IndentedTextWriter.")]
 	public static void Block(
 		this IndentedTextWriter writer,
 		string header,
 		Action callback = default!,
-		params IndentedTextWriterBlock[] blocks)
-	{
-		Header(header);
-		Invoke(callback);
-
-		foreach (var block in blocks)
-		{
-			Header(block.Text);
-			Invoke(block.Callback);
-		}
-
-		void Header(string? text)
-		{
-			if (text is null)
-				return;
-
-			foreach (var header in text.Replace(writer.NewLine, "\n").Split('\n'))
-			{
-				var tabs = header.TakeWhile(p => p == '\t').Count();
-				writer.Indent += tabs;
-				writer.WriteLine(header.TrimStart());
-				writer.Indent -= tabs;
-			}
-		}
-
-		void Invoke(Action? callback)
-		{
-			if (callback is null)
-				return;
-
-			writer.WriteLine("{");
-			writer.Indent++;
-			callback();
-			writer.Indent--;
-			writer.WriteLine("}");
-		}
-	}
+		params SourceGeneratorWriterBlock[] blocks)
+		=> SourceGeneratorWriter.Block(writer, header, "\t", callback, blocks);
 }

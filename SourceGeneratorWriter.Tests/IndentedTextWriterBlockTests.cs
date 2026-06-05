@@ -6,10 +6,9 @@ public class IndentedTextWriterBlockTests
 {
 	/// <summary>Runs <paramref name="emit"/> against a tab-indented writer and returns the
 	/// produced text with newlines normalized to <c>\n</c> for stable assertions.</summary>
-	private static string Emit(Action<IndentedTextWriter> emit)
+	private static string Emit(Action<System.CodeDom.Compiler.SourceGeneratorWriter> emit)
 	{
-		StringWriter text = new();
-		IndentedTextWriter writer = new(text, "\t");
+		System.CodeDom.Compiler.SourceGeneratorWriter writer = new();
 		emit(writer);
 		return writer.InnerWriter.ToString()!.Replace(writer.NewLine, "\n").TrimEnd();
 	}
@@ -93,7 +92,7 @@ public class IndentedTextWriterBlockTests
 	[Fact]
 	public void Implicit_conversion_from_string_produces_a_text_block()
 	{
-		IndentedTextWriterBlock block = "header";
+		SourceGeneratorWriterBlock block = "header";
 
 		Assert.True(block.IsText);
 		Assert.False(block.IsCallback);
@@ -104,7 +103,7 @@ public class IndentedTextWriterBlockTests
 	public void Implicit_conversion_from_action_produces_a_callback_block()
 	{
 		var ran = false;
-		IndentedTextWriterBlock block = (Action)(() => ran = true);
+		SourceGeneratorWriterBlock block = (Action)(() => ran = true);
 
 		Assert.True(block.IsCallback);
 		Assert.False(block.IsText);
